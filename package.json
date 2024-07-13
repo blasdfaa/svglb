@@ -44,7 +44,7 @@
   },
   "files": [
     "dist",
-    "template-*"
+    "template-react"
   ],
   "scripts": {
     "build": "unbuild",
