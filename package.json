@@ -43,7 +43,8 @@
     "svglb": "./dist/index.mjs"
   },
   "files": [
-    "dist"
+    "dist",
+    "template-*"
   ],
   "scripts": {
     "build": "unbuild",
