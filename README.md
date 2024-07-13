@@ -8,6 +8,24 @@
 
 SVG library Generator - This is a simple and convenient cli app for creating SVG icon libraries. With it, you can easily combine a set of SVG files into a single library ready for publication in npm.
 
+## New Project
+
+```bash
+npx svglb@latest init <project-name>
+```
+
+Change directory into your new project from your terminal:
+
+```bash
+cd <project-name>
+```
+
+Build icons libary:
+
+```bash
+npm run build
+```
+
 <!-- Badges -->
 
 [npm-version-src]: https://img.shields.io/npm/v/svglb?style=flat&colorA=080f12&colorB=1fa669
