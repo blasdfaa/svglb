@@ -22,8 +22,8 @@ export default defineCommand({
     const cwd = resolve(args.cwd)
     const templateDir = resolve(
       fileURLToPath(import.meta.url),
-      '../..',
-        `template-react`,
+      '../../..',
+      `template-react`,
     )
 
     try {
