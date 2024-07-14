@@ -11,7 +11,7 @@ const main = defineCommand({
   subCommands: {
     init: () => import('./commands/init').then(r => r.default),
     import: () => import('./commands/import').then(r => r.default),
-    sync: () => import('./commands/sync').then(r => r.default),
+    generate: () => import('./commands/generate').then(r => r.default),
   },
 })
 
