@@ -8,7 +8,7 @@ import { transform } from '@svgr/core'
 import { createIndexFile, prettify } from '../utils'
 
 export const DEFAULT_SVGS_DIRNAME = 'svgs'
-export const DEFAULT_ICONS_DIRNAME = 'testsrc'
+export const DEFAULT_ICONS_DIRNAME = 'src'
 
 export default defineCommand({
   meta: {
