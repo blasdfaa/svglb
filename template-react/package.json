@@ -44,7 +44,7 @@
     "test": "vitest",
     "typecheck": "tsc --noEmit",
     "prepare": "simple-git-hooks",
-    "generate": "tsx scripts/generate.ts"
+    "generate": "svglb generate -d src"
   },
   "peerDependencies": {
     "react": "*"
@@ -67,6 +67,7 @@
     "prettier": "^3.3.3",
     "rimraf": "^5.0.8",
     "simple-git-hooks": "^2.11.1",
+    "svglb": "latest",
     "tsx": "^4.16.2",
     "typescript": "^5.5.3",
     "unbuild": "^2.0.0",
