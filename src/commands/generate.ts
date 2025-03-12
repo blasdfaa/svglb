@@ -2,13 +2,26 @@ import fs from 'node:fs/promises'
 import process from 'node:process'
 import { defineCommand } from 'citty'
 import consola from 'consola'
-import { join, parse, resolve } from 'pathe'
+import { join, resolve } from 'pathe'
+import { importDirectory } from '@iconify/tools'
 import { pascalCase } from 'scule'
-import { transform } from '@svgr/core'
-import { createIndexFile, prettify } from '../utils'
+import { createIndexFile, prettify, processSVG } from '../utils'
+import type { TemplateGenerator } from '../utils'
+import vueTemplate from '../transforms/vue'
+import solidTemplate from '../transforms/solid'
+import reactTemplate from '../transforms/react'
 
 export const DEFAULT_SVGS_DIRNAME = 'svgs'
-export const DEFAULT_ICONS_DIRNAME = 'src'
+export const DEFAULT_ICONS_DIRNAME = 'lib'
+
+const FRAMEWORKS = ['react', 'vue', 'solid'] as const
+type Framework = typeof FRAMEWORKS[number]
+
+const templates: Record<Framework, TemplateGenerator> = {
+  vue: vueTemplate,
+  solid: solidTemplate,
+  react: reactTemplate,
+}
 
 export default defineCommand({
   meta: {
@@ -21,36 +34,43 @@ export default defineCommand({
       type: 'string',
       alias: 'd',
     },
+    framework: {
+      description: 'Target framework (react, vue, solid)',
+      type: 'string',
+      default: 'react',
+    },
   },
   run: async ({ args }) => {
+    const framework = args.framework as Framework
+    if (!FRAMEWORKS.includes(framework)) {
+      consola.error(`Invalid framework. Must be one of: ${FRAMEWORKS.join(', ')}`)
+      process.exit(1)
+    }
+
     const svgsDir = resolve(args.dir || DEFAULT_SVGS_DIRNAME)
     const iconsDir = resolve(DEFAULT_ICONS_DIRNAME)
+    const template = templates[framework]
+    const iconFiles: string[] = []
 
     try {
-      consola.start('Generating components...')
+      consola.start(`Generating ${framework} components...`)
+      const iconSet = await importDirectory(svgsDir)
 
-      const files = (await fs.readdir(svgsDir))
-        .map(file => join(svgsDir, file))
-        .sort((fileA, fileB) => (parse(fileA).name > parse(fileB).name ? 1 : -1))
+      await iconSet.forEach(async (name, type) => {
+        if (type !== 'icon')
+          return
 
-      const iconFiles = await Promise.all(
-        files.map(async (file) => {
-          const id = parse(file).name
-          const componentName = pascalCase(id)
-          const code = await fs.readFile(file, 'utf8')
-          const iconFile = join(iconsDir, `${componentName}.tsx`)
-          const content = await transform(
-            code,
-            { typescript: true, plugins: ['@svgr/plugin-jsx'] },
-            { componentName },
-          )
+        const svg = iconSet.toSVG(name)
+        if (!svg)
+          return
 
-          const prettyContent = await prettify(content, iconFile)
-
-          await fs.writeFile(iconFile, prettyContent)
-          return iconFile
-        }),
-      )
+        await processSVG(svg)
+        const content = template.generateComponent(svg.toMinifiedString(), pascalCase(name))
+        const iconFile = join(iconsDir, `${name}.${template.extension}`)
+        const prettyContent = await prettify(content, iconFile)
+        await fs.writeFile(iconFile, prettyContent)
+        iconFiles.push(iconFile)
+      })
 
       await createIndexFile(iconFiles, iconsDir)
       consola.success('Generation completed.')
